@@ -4,7 +4,7 @@
 import cv2
 
 # defining what camera is capturing footage
-camera = cv2.VideoCapture(1)
+camera = cv2.VideoCapture(0)
 
 # creating a QR code detector object
 detector = cv2.QRCodeDetector()
