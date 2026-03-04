@@ -31,7 +31,7 @@ while True:
     cv2.imshow("QR Decoder", frame)
 
     # wait 1ms for a key press, if the user presses 'esc' then stop the loop
-    if cv2.waitKey(1) == 27
+    if cv2.waitKey(1) == 27:
         break
 
 camera.release()
