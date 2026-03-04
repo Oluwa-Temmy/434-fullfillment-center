@@ -20,8 +20,8 @@ while True:
         break
 
     # try to find and decode a QR code in the frame
-    # data = decoded text, other two values we don't need
-    data, _, _ = detector.detectAndDecode(frame)
+    # data = decoded text, other two values are optional but we are adding points for detection
+    data, points, _ = detector.detectAndDecode(frame)
 
     # if a QR code was found and decoded, print the data
     if data:
