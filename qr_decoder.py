@@ -27,12 +27,8 @@ while True:
     if data:
         print(data)
 
-    # show the live camera feed in a window called "QR Scanner"
-    cv2.imshow("QR Decoder", frame)
-
     # wait 1ms for a key press, if the user presses 'esc' then stop the loop
     if cv2.waitKey(1) == 27:
         break
 
 camera.release()
-cv2.destroyAllWindows()
