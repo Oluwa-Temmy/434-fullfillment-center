@@ -2,9 +2,11 @@
 
 # importing OpenCV package
 import cv2
+import json
 
 east_coast = ("ME", "NH", "MA", "RI", "CT", "NY", 
               "NJ", "DE", "MD", "VA", "NC", "SC", "GA", "FL")
+
 west_coast = ("CA", "OR", "WA")
 
 # defining what camera is capturing footage
@@ -24,20 +26,25 @@ while True:
         break
 
     # try to find and decode a QR code in the frame
-    # data = decoded text, other two values are optional but we are adding points for detection
-    data, points, _ = detector.detectAndDecode(frame)
+    # data = decoded text, other two values we don't need
+    data, _, _ = detector.detectAndDecode(frame)
 
     # if a QR code was found and decoded, print the data
-    # {"package_id": "PKG-1", "name": "Jane Doe", "address": "1000 S Maple Ave, Miami, FL", "zip_code": "33101", "weight": "1.5lbs"}
-    
     if data:
         print(data)
 
-    state = data["address"].split(",")[-1].strip()
-    print(state)
-    
-    # wait 1ms for a key press, if the user presses 'esc' then stop the loop
-    if cv2.waitKey(1) == 27:
-        break
+        package = json.loads(data)
+        address = package["address"]
+
+        state = address.split(",")[-1].strip()
+
+        if state in east_coast:
+            print("Package going to EAST COAST")
+
+        elif state in west_coast:
+            print("Package going to WEST COAST")
+
+        else:
+            print("Package going to OTHER REGION")
 
 camera.release()
