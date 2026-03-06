@@ -31,13 +31,13 @@ while True:
 
     # if a QR code was found and decoded, print the data
     if data:
-        print(data)
+        print("package data: " + data + "\n")
 
         package = json.loads(data)
         address = package["address"]
 
         state = address.split(",")[-1].strip()
-        print("State " + state + "\n")
+        print("State: " + state + "\n")
   
         if state in east_coast:
             print("Package going to EAST COAST\n")
