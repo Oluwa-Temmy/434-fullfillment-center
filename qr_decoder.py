@@ -30,22 +30,11 @@ while True:
     # if a QR code was found and decoded, print the data
     # {"package_id": "PKG-1", "name": "Jane Doe", "address": "1000 S Maple Ave, Miami, FL", "zip_code": "33101", "weight": "1.5lbs"}
     
-   if data:
-     print("Raw QR Data:", data)
-     package = json.loads(data)
-     address = package["address"]
-     
-     # get state from address
-     state = address.split(",")[-1].strip()
+    if data:
+        print(data)
 
-     print("State:", state)
-     
-       if state in east_coast:
-         print("Package going to EAST COAST")
-       elif state in west_coast:
-         print("Package going to WEST COAST")
-       else:
-         print("Package going to OTHER REGION")
+    state = data["address"].split(",")[-1].strip()
+    print(state)
     
     # wait 1ms for a key press, if the user presses 'esc' then stop the loop
     if cv2.waitKey(1) == 27:
