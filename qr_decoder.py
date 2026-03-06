@@ -40,12 +40,12 @@ while True:
 
      print("State:", state)
      
-     if state in east_coast:
-       print("Package going to EAST COAST")
-     elif state in west_coast:
-       print("Package going to WEST COAST")
-     else:
-       print("Package going to OTHER REGION")
+       if state in east_coast:
+         print("Package going to EAST COAST")
+       elif state in west_coast:
+         print("Package going to WEST COAST")
+       else:
+         print("Package going to OTHER REGION")
     
     # wait 1ms for a key press, if the user presses 'esc' then stop the loop
     if cv2.waitKey(1) == 27:
