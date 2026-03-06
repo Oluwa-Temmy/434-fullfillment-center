@@ -37,7 +37,7 @@ while True:
         address = package["address"]
 
         state = address.split(",")[-1].strip()
-        print(state + \n)
+        print(state\n)
   
         if state in east_coast:
             print("\nPackage going to EAST COAST")
