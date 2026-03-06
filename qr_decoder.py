@@ -3,8 +3,9 @@
 # importing OpenCV package
 import cv2
 
-east_coast = ()
-west_coast = ()
+east_coast = ("ME", "NH", "MA", "RI", "CT", "NY", 
+              "NJ", "DE", "MD", "VA", "NC", "SC", "GA", "FL")
+west_coast = ("CA", "OR", "WA")
 
 # defining what camera is capturing footage
 camera = cv2.VideoCapture(0)
