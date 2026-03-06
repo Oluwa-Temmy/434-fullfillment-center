@@ -3,6 +3,9 @@
 # importing OpenCV package
 import cv2
 
+east_coast = ()
+west_coast = ()
+
 # defining what camera is capturing footage
 camera = cv2.VideoCapture(0)
 
@@ -24,9 +27,14 @@ while True:
     data, points, _ = detector.detectAndDecode(frame)
 
     # if a QR code was found and decoded, print the data
+    # {"package_id": "PKG-1", "name": "Jane Doe", "address": "1000 S Maple Ave, Miami, FL", "zip_code": "33101", "weight": "1.5lbs"}
+    
     if data:
         print(data)
 
+    state = data["address"].split(",")[-1].strip()
+    print(state)
+    
     # wait 1ms for a key press, if the user presses 'esc' then stop the loop
     if cv2.waitKey(1) == 27:
         break
