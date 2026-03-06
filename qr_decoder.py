@@ -33,7 +33,7 @@ while True:
     if data:
         print(data)
 
-    state = data["address"].split(",")[-1].strip()
+    state = data[3].split(",")[-1].strip()
     print(state)
     
     # wait 1ms for a key press, if the user presses 'esc' then stop the loop
