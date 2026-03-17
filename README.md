@@ -63,7 +63,6 @@ Inspired by Amazon's ADPTA conveyor belt system used in fulfillment centers to a
 ## 👥 Contributors
 
 - [Osayi Odiase](https://github.com/Oluwa-Temmy)
-- [Contributor 2](https://github.com/)
-- [Contributor 3](https://github.com/)
-- [Contributor 4](https://github.com/)
-- [Contributor 5](https://github.com/)
+- [code-made-a-line](https://github.com/code-made-a-line)
+- [CrisR45](https://github.com/CrisR45)
+- [vbells](https://github.com/vbells)
