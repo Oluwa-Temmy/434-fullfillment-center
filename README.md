@@ -20,6 +20,22 @@ A replica of Amazon's ADPTA conveyor belt system that simulates package flow and
 
 ---
 
+## 🚀 Getting Started
+
+```bash
+# Clone the repo
+git clone https://github.com/Oluwa-Temmy/434-fullfillment-center.git
+cd 434-fullfillment-center
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the app
+flask run
+```
+
+---
+
 ## ⚙️ Features
 
 - Conveyor belt simulation modeled after Amazon's ADPTA system
@@ -35,22 +51,6 @@ A replica of Amazon's ADPTA conveyor belt system that simulates package flow and
 |---|---|
 | Backend | Python, C++ |
 | Frontend | HTML, CSS, Flask |
-
----
-
-## 🚀 Getting Started
-
-```bash
-# Clone the repo
-git clone https://github.com/Oluwa-Temmy/434-fullfillment-center.git
-cd 434-fullfillment-center
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the app
-flask run
-```
 
 ---
 
