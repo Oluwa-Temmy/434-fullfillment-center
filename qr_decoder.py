@@ -1,4 +1,50 @@
-# program to detect and decode qr codes 
+import cv2
+import json
+from pyzbar.pyzbar import decode
+
+east_coast = ("ME", "NH", "MA", "RI", "CT", "NY", 
+              "NJ", "DE", "MD", "VA", "NC", "SC", "GA", "FL")
+west_coast = ("CA", "OR", "WA")
+
+camera = cv2.VideoCapture(0)
+
+while True:
+    success, frame = camera.read()
+    if not success:
+        break
+
+    # decode QR codes in the frame
+    qr_codes = decode(frame)
+
+    for qr in qr_codes:
+        data = qr.data.decode('utf-8')
+        print("Package data: " + data)
+
+        try:
+            package = json.loads(data)
+            address = package.get("address", "")
+            state = address.split(",")[-1].strip()
+            print("State: " + state)
+
+            if state in east_coast:
+                print("Package going to EAST COAST\n")
+            elif state in west_coast:
+                print("Package going to WEST COAST\n")
+            else:
+                print("Package going to OTHER REGION\n")
+
+        except json.JSONDecodeError:
+            print("Error: QR code data is not valid JSON\n")
+
+    # q to quit
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+camera.release()
+cv2.destroyAllWindows()
+
+
+"""# program to detect and decode qr codes 
 
 # importing OpenCV package
 import cv2
@@ -48,4 +94,4 @@ while True:
         else:
             print("Package going to OTHER REGION")
 
-camera.release()
+camera.release() """
