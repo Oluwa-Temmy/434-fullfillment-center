@@ -64,7 +64,6 @@ while True:
             print("Error: QR code data is not valid JSON\n")
 
     # q to quit
-    cv2.imshow("QR Scanner", frame) # to view camera feed 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
