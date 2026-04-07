@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>434 Fulfillment Center</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:       #0B1F3A;
+      --navy-mid:   #1A3557;
+      --navy-light: #2A4F78;
+      --yellow:     #F5C518;
+      --yellow-dk:  #D4A90D;
+      --white:      #F8F9FA;
+      --muted:      #8CA8C8;
+      --border:     rgba(138,168,200,0.2);
+      --row-hover:  rgba(245,197,24,0.06);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Barlow', sans-serif;
+    }
+
+    .banner {
+      background: var(--navy-mid);
+      border-bottom: 3px solid var(--yellow);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 28px;
+    }
+
+
+    .banner-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 22px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+    }
+
+    .banner-sub {
+      margin-left: auto;
+      font-size: 12px; color: var(--muted); letter-spacing: 0.5px;
+    }
+
+    .stats-row {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-cell {
+      flex: 1;
+      padding: 10px 24px;
+      display: flex; align-items: center; gap: 10px;
+      border-right: 1px solid var(--border);
+    }
+    .stat-cell:last-child { border-right: none; }
+
+    .stat-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+      background: var(--yellow);
+    }
+    .stat-dot.east { background: #4A9EE0; }
+    .stat-dot.west { background: #5DCAA5; }
+
+    .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-val   { font-size: 18px; font-weight: 600; line-height: 1; }
+
+    .main-body {
+      display: flex;
+      height: calc(100vh - 120px); /* banner + stats */
+    }
+
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--navy-mid);
+      border-right: 1px solid var(--border);
+      padding: 20px 16px;
+      display: flex; flex-direction: column; gap: 24px;
+    }
+
+    .filter-section { display: flex; flex-direction: column; gap: 8px; }
+
+    .filter-label {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 2px;
+    }
+
+    .filter-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: var(--white);
+      font-family: 'Barlow', sans-serif; font-size: 13px;
+      cursor: pointer; text-align: left;
+      display: flex; align-items: center; gap: 8px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .filter-btn:hover { background: rgba(245,197,24,0.08); border-color: rgba(245,197,24,0.4); }
+    .filter-btn.active { background: rgba(245,197,24,0.15); border-color: var(--yellow); color: var(--yellow); }
+
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot-all  { background: var(--muted); }
+    .dot-east { background: #4A9EE0; }
+    .dot-west { background: #5DCAA5; }
+
+    .date-row { display: flex; flex-direction: column; gap: 4px; }
+    .date-row-label { font-size: 11px; color: var(--muted); }
+
+    .date-input {
+      background: var(--navy); border: 1px solid var(--border);
+      border-radius: 6px; padding: 8px 10px;
+      color: var(--white); font-family: 'Barlow', sans-serif; font-size: 12px;
+      width: 100%; outline: none;
+    }
+    .date-input:focus { border-color: var(--yellow); }
+
+    .reset-btn {
+      margin-top: auto;
+      background: transparent; border: 1px solid var(--border);
+      border-radius: 6px; padding: 9px;
+      color: var(--muted); font-family: 'Barlow', sans-serif; font-size: 12px;
+      cursor: pointer; text-align: center; letter-spacing: 0.5px;
+      transition: all 0.15s;
+    }
+    .reset-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+
+    /* TABLE */
+    .table-area {
+      flex: 1; overflow: auto; padding: 20px;
+    }
+
+    .table-toolbar {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 14px;
+    }
+
+    .table-title { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+    .results-count { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .results-count strong { color: var(--yellow); }
+
+    .search-input {
+      background: var(--navy-mid); border: 1px solid var(--border);
+      border-radius: 6px; padding: 7px 12px;
+      color: var(--white); font-family: 'Barlow', sans-serif; font-size: 13px;
+      outline: none; width: 210px;
+    }
+    .search-input:focus { border-color: var(--yellow); }
+    .search-input::placeholder { color: var(--muted); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+    thead th {
+      text-align: left; padding: 10px 14px;
+      font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--muted); border-bottom: 1px solid var(--border);
+      white-space: nowrap; cursor: pointer; user-select: none;
+    }
+    thead th:hover { color: var(--yellow); }
+
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    tbody tr:hover { background: var(--row-hover); }
+    tbody td { padding: 11px 14px; vertical-align: middle; }
+
+    .id-badge {
+      display: inline-block;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px; font-weight: 600;
+      background: rgba(245,197,24,0.12);
+      color: var(--yellow);
+      border: 1px solid rgba(245,197,24,0.3);
+      border-radius: 4px;
+      padding: 2px 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .coast-badge {
+      display: inline-block; padding: 3px 9px;
+      border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
+    }
+    .coast-east { background: rgba(74,158,224,0.15); color: #4A9EE0; border: 1px solid rgba(74,158,224,0.3); }
+    .coast-west { background: rgba(93,202,165,0.15); color: #5DCAA5; border: 1px solid rgba(93,202,165,0.3); }
+
+    .text-muted { color: var(--muted); }
+    .text-mono  { font-variant-numeric: tabular-nums; }
+
+    .no-results {
+      text-align: center; padding: 60px 20px;
+      color: var(--muted); font-size: 14px;
+    }
+
+    .loading { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 13px; letter-spacing: 0.5px; }
+
+    .error-msg {
+      background: rgba(226,75,74,0.1); border: 1px solid rgba(226,75,74,0.3);
+      border-radius: 8px; padding: 14px 18px;
+      color: #E24B4A; font-size: 13px; margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- BANNER -->
+<div class="banner">
+  <div class="banner-icon">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="14" width="20" height="3" rx="1" fill="#0B1F3A"/>
+      <rect x="4" y="11" width="16" height="3" rx="1" fill="#0B1F3A"/>
+      <circle cx="7" cy="19" r="2" fill="#0B1F3A"/>
+      <circle cx="17" cy="19" r="2" fill="#0B1F3A"/>
+      <rect x="7" y="7" width="10" height="4" rx="1" fill="#0B1F3A"/>
+    </svg>
+  </div>
+  <div class="banner-title">434 Fulfillment Center</div>
+  <div class="banner-sub">Package Tracking Dashboard</div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row" id="statsRow">
+  <div class="stat-cell"><div class="stat-dot"></div><div><div class="stat-label">Total</div><div class="stat-val" id="statTotal">—</div></div></div>
+  <div class="stat-cell"><div class="stat-dot east"></div><div><div class="stat-label">East Coast</div><div class="stat-val" id="statEast">—</div></div></div>
+  <div class="stat-cell"><div class="stat-dot west"></div><div><div class="stat-label">West Coast</div><div class="stat-val" id="statWest">—</div></div></div>
+</div>
+
+<!-- MAIN -->
+<div class="main-body">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="filter-section">
+      <div class="filter-label">Coast</div>
+      <button class="filter-btn active" id="btn-all"  onclick="setCoast('')">
+        <span class="dot dot-all"></span> All Packages
+      </button>
+      <button class="filter-btn" id="btn-East" onclick="setCoast('East')">
+        <span class="dot dot-east"></span> East Coast
+      </button>
+      <button class="filter-btn" id="btn-West" onclick="setCoast('West')">
+        <span class="dot dot-west"></span> West Coast
+      </button>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-label">Shipping Date</div>
+      <div class="date-row">
+        <div class="date-row-label">From</div>
+        <input class="date-input" type="date" id="dateFrom" onchange="fetchPackages()" />
+      </div>
+      <div class="date-row">
+        <div class="date-row-label">To</div>
+        <input class="date-input" type="date" id="dateTo" onchange="fetchPackages()" />
+      </div>
+    </div>
+
+    <button class="reset-btn" onclick="resetFilters()">Reset Filters</button>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-area">
+    <div id="errorBox" class="error-msg" style="display:none;"></div>
+
+    <div class="table-toolbar">
+      <div>
+        <div class="table-title">Package Records</div>
+        <div class="results-count" id="resultsCount"><strong>0</strong> results</div>
+      </div>
+      <input class="search-input" type="text" id="searchInput"
+             placeholder="Search name or state..." oninput="renderTable()" />
+    </div>
+
+    <div id="loadingMsg" class="loading">Loading packages…</div>
+
+    <table id="pkgTable" style="display:none;">
+      <thead>
+        <tr>
+          <th onclick="sortBy('id')">Shipping ID</th>
+          <th onclick="sortBy('last')">Name</th>
+          <th onclick="sortBy('address')">Address</th>
+          <th onclick="sortBy('state')">State</th>
+          <th onclick="sortBy('coast')">Coast</th>
+          <th onclick="sortBy('ship_date')">Expected Ship Date</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+
+    <div class="no-results" id="noResults" style="display:none;">
+      No packages match the current filters.
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── Config ──────────────────────────────────────────────
+  const API_BASE = "http://127.0.0.1:5000";
+
+  // ── State ────────────────────────────────────────────────
+  let allPackages = [];
+  let coastFilter = "";
+  let sortKey = "id";
+  let sortAsc = true;
+
+  // ── Fetch from Flask API ─────────────────────────────────
+  async function fetchPackages() {
+    const dateFrom = document.getElementById("dateFrom").value;
+    const dateTo   = document.getElementById("dateTo").value;
+
+    const params = new URLSearchParams();
+    if (coastFilter)  params.set("coast", coastFilter);
+    if (dateFrom)     params.set("date_from", dateFrom);
+    if (dateTo)       params.set("date_to", dateTo);
+
+    try {
+      showError(null);
+      document.getElementById("loadingMsg").style.display = "block";
+      document.getElementById("pkgTable").style.display = "none";
+      document.getElementById("noResults").style.display = "none";
+
+      const res = await fetch(`${API_BASE}/api/packages?${params}`);
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      allPackages = await res.json();
+
+      updateStats(allPackages);
+      renderTable();
+    } catch (err) {
+      showError(`Could not reach the Flask API. Make sure app.py is running on ${API_BASE}.<br><small>${err.message}</small>`);
+    } finally {
+      document.getElementById("loadingMsg").style.display = "none";
+    }
+  }
+
+  // ── Stats row (based on full unfiltered dataset) ─────────
+  function updateStats(data) {
+    document.getElementById("statTotal").textContent = data.length;
+    document.getElementById("statEast").textContent  = data.filter(p => p.coast === "East").length;
+    document.getElementById("statWest").textContent  = data.filter(p => p.coast === "West").length;
+  }
+
+  // ── Client-side search + sort + render ───────────────────
+  function renderTable() {
+    const search = document.getElementById("searchInput").value.toLowerCase();
+
+    let rows = allPackages.filter(p => {
+      if (!search) return true;
+      const name = (p.first + " " + p.last).toLowerCase();
+      return name.includes(search) || p.state.toLowerCase().includes(search);
+    });
+
+    rows.sort((a, b) => {
+      const av = a[sortKey] ?? "";
+      const bv = b[sortKey] ?? "";
+      const cmp = String(av).localeCompare(String(bv), undefined, { numeric: true });
+      return sortAsc ? cmp : -cmp;
+    });
+
+    const tbody = document.getElementById("tableBody");
+    const table  = document.getElementById("pkgTable");
+    const noRes  = document.getElementById("noResults");
+
+    document.getElementById("resultsCount").innerHTML =
+      `<strong>${rows.length}</strong> result${rows.length !== 1 ? "s" : ""}`;
+
+    if (rows.length === 0) {
+      table.style.display = "none";
+      noRes.style.display = "block";
+      return;
+    }
+
+    table.style.display = "table";
+    noRes.style.display = "none";
+
+    tbody.innerHTML = rows.map(p => `
+      <tr>
+        <td><span class="id-badge">#${String(p.id).padStart(3, "0")}</span></td>
+        <td style="font-weight:500;">${p.first} ${p.last}</td>
+        <td class="text-muted">${p.address}</td>
+        <td>${p.state}</td>
+        <td><span class="coast-badge coast-${p.coast.toLowerCase()}">${p.coast}</span></td>
+        <td class="text-muted text-mono">${fmtDate(p.ship_date)}</td>
+      </tr>
+    `).join("");
+  }
+
+  // ── Sorting ───────────────────────────────────────────────
+  function sortBy(key) {
+    sortAsc = sortKey === key ? !sortAsc : true;
+    sortKey = key;
+    renderTable();
+  }
+
+  // ── Coast filter ─────────────────────────────────────────
+  function setCoast(val) {
+    coastFilter = val;
+    const map = { "": "btn-all", "East": "btn-East", "West": "btn-West" };
+    ["btn-all", "btn-East", "btn-West"].forEach(id =>
+      document.getElementById(id).classList.toggle("active", id === map[val])
+    );
+    fetchPackages();
+  }
+
+  // ── Reset ─────────────────────────────────────────────────
+  function resetFilters() {
+    coastFilter = "";
+    document.getElementById("dateFrom").value = "";
+    document.getElementById("dateTo").value   = "";
+    document.getElementById("searchInput").value = "";
+    ["btn-all", "btn-East", "btn-West"].forEach(id =>
+      document.getElementById(id).classList.toggle("active", id === "btn-all")
+    );
+    fetchPackages();
+  }
+
+  // ── Helpers ───────────────────────────────────────────────
+  function fmtDate(str) {
+    const [y, m, d] = str.split("-");
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return `${months[+m - 1]} ${+d}, ${y}`;
+  }
+
+  function showError(msg) {
+    const box = document.getElementById("errorBox");
+    if (msg) { box.innerHTML = msg; box.style.display = "block"; }
+    else      { box.style.display = "none"; }
+  }
+
+  // ── Init ──────────────────────────────────────────────────
+  fetchPackages();
+</script>
+</body>
+</html>
