@@ -3,8 +3,8 @@ import json
 from pyzbar.pyzbar import decode
 
 east_coast = ("ME", "NH", "MA", "RI", "CT", "NY", 
-              "NJ", "DE", "MD", "VA", "NC", "SC", "GA", "FL")
-west_coast = ("CA", "OR", "WA")
+              "NJ", "DE", "MD", "VA", "NC", "SC", "GA", "FL", "IL", "PA", "WV")
+west_coast = ("CA", "OR", "WA", "AK", "HI")
 
 camera = cv2.VideoCapture(0)
 
