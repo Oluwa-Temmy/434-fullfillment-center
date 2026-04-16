@@ -31,7 +31,7 @@ while True:
             package = json.loads(data)
             name = package.get("name", "")
             address = package.get("address", "")
-            state = package.get("state", "")
+            state = address.split(",")[-1].strip()
             print("State: " + state)
 
         # region logic
