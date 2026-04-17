@@ -4,7 +4,7 @@ import json
 # ask for input package details 
 pkg_id = input("Package ID: ")
 name = input("Full Name: ")
-address = input("Street Address: (e.g. 123 Main St): ")
+street_address = input("Street Address: (e.g. 123 Main St): ")
 city = input("City: ")
 state = input("State (e.g. CA): ")
 zip_code = input("Zip Code: ")
@@ -14,7 +14,9 @@ weight = input("Weight (e.g. 3.2): ")
 data = {
     "package_id": pkg_id,
     "name": name,
-    "address": f"{address}, {city}, {state}",
+    "street_address": street_address,
+    "city": city,
+    "state": state,
     "zip_code": zip_code,
     "weight": f"{weight}lbs"
 }
