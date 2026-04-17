@@ -5,7 +5,7 @@ import datetime
  
 # Initialize Flask app
 app = Flask(__name__)
-#CORS(app)
+CORS(app)  # Enable CORS for all routes
 
 # route to the home page that renders the home.html template
 @app.route("/")
