@@ -58,12 +58,13 @@ def main():
     camera = cv2.VideoCapture(0)
     arduino = ArduinoInterface()
     conveyor = ConveyorController(arduino)
+    SERVO_CHANNEL = 0
 
     i2c = busio.I2C(3, 2)
     kit = ServoKit(channels=16, i2c=i2c)
     kit.servo[SERVO_CHANNEL].set_pulse_width_range(500, 2500)
 
-    SERVO_CHANNEL = 0
+    
     QR_READ_TIMEOUT = 2.0  # Max seconds to try reading QR
     SERVO_DELAY = 1.0  # Seconds to wait after starting conveyor before moving servo
     
