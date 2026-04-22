@@ -47,7 +47,7 @@ class ConveyorController:
 """ Servo controll code for the arm that will sort the packages will 
 move via Raspberry Pi GPIO pins to control the servo motor """
 
-API_URL = "http://127.0.0.1:5000/api/add-package"
+API_URL = "http://10.0.192.208:5000/api/add-package"
 
 # to determine which region the package is going to based on the state in the address
 east_coast = ("ME", "NH", "MA", "RI", "CT", "NY", 
