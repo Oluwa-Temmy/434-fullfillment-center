@@ -56,7 +56,7 @@ west_coast = ("CA", "OR", "WA")
 
 def main():
     camera = cv2.VideoCapture(0)
-    arduino = ArduinoInterface()
+    arduino = ArduinoInterface(port='/dev/ttyACM0') 
     conveyor = ConveyorController(arduino)
     SERVO_CHANNEL = 0
 
