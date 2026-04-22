@@ -87,6 +87,7 @@ def main():
 
             try:
                 package = json.loads(data)
+                pkg_id = package.get("pkg_id", "")
                 name = package.get("name", "")
                 street_address = package.get("street_address", "")
                 city = package.get("city", "")
@@ -125,9 +126,13 @@ def main():
 
                 # Send the package data to the API
                 response = requests.post(API_URL, json={
+                    "Package ID": pkg_id,
                     "name": name,
-                    "address": address,
+                    "street_address": street_address,
+                    "city": city,
                     "state": state,
+                    "zip_code": zip_code,
+                    "weight": weight,
                     "region": region
                 })
 
