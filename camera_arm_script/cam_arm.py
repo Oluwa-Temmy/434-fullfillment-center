@@ -95,7 +95,7 @@ def main():
     
     QR_READ_TIMEOUT = 2.0  # Max seconds to try reading QR
     SERVO_DELAY = 0.25     # Seconds to wait after starting conveyor before moving servo
-    
+    API_URL = "http://10.0.192.208:5000/api/packages"
     package_detected = False
     detection_start_time = None
     last_qr_data = None
