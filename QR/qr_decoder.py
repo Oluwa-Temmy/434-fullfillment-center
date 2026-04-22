@@ -22,8 +22,10 @@ while True:
 
         try:
             package = json.loads(data)
-            address = package.get("address", "")
-            state = address.split(",")[-1].strip()
+            street = package.get("street_address", "")
+            city = package.get("city", "")
+            state = package.get("state", "")
+            address = f"{street}, {city}, {state}"
             print("State: " + state)
 
             if state in east_coast:
