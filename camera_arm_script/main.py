@@ -4,7 +4,7 @@ from pyzbar.pyzbar import decode
 import requests
 import serial
 import serial.tools.list_ports
-from time import sleep
+from time import sleep, time
 from arduino_interface import ArduinoInterface
 from adafruit_servokit import ServoKit
 import busio
@@ -65,9 +65,12 @@ def main():
     kit.servo[SERVO_CHANNEL].set_pulse_width_range(500, 2500)
 
     
-    QR_READ_TIMEOUT = 2.0  # Max seconds to try reading QR once stopped
+    QR_READ_TIMEOUT = 2.0  # Max seconds to try reading QR
     SERVO_DELAY = 1.0  # Seconds to wait after starting conveyor before moving servo
-    conveyor.start()
+    
+    package_detected = False
+    detection_start_time = None
+    last_qr_data = None
 
   
     while True:
@@ -75,69 +78,70 @@ def main():
         if not success:
             break
 
+        # decode QR codes in the frame
         qr_codes = decode(frame)
-        if not qr_codes:
-            continue
 
-        data = qr_codes[0].data.decode('utf-8')
-        print("Package data: " + data)
+        for qr in qr_codes:
+            data = qr.data.decode('utf-8')
+            print("Package data: " + data)
 
-        try:
-            package = json.loads(data)
-            pkg_id = package.get("pkg_id", "")
-            name = package.get("name", "")
-            street_address = package.get("street_address", "")
-            city = package.get("city", "")
-            state = package.get("state", "")
-            zip_code = package.get("zip_code", "")
-            weight = package.get("weight", "")
-            print("State: " + state)
+            try:
+                package = json.loads(data)
+                pkg_id = package.get("pkg_id", "")
+                name = package.get("name", "")
+                street_address = package.get("street_address", "")
+                city = package.get("city", "")
+                state = package.get("state", "")
+                zip_code = package.get("zip_code", "")
+                weight = package.get("weight", "")
+                print("State: " + state)
 
-            conveyor.stop()
-            sleep(QR_READ_TIMEOUT)
+                # region logic
+                if state in east_coast:
+                    region = "EAST"
+                    print("Package going to EAST COAST\n")
+                    conveyor.stop()
+                    sleep(SERVO_DELAY)
+                    kit.servo[SERVO_CHANNEL].angle = 140  # Move servo to east position
+                    sleep(10)  # Wait for servo to move
+                    kit.servo[SERVO_CHANNEL].angle = 180  # Move servo back to center
+                    sleep(10)  # Wait for servo to move
+                    conveyor.start()  # Start conveyor again
 
-            # region logic
-            if state in east_coast:
-                region = "EAST"
-                print("Package going to EAST COAST\n")
-                sleep(SERVO_DELAY)
-                kit.servo[SERVO_CHANNEL].angle = 140  # Move servo to east position
-                sleep(10)  # Wait for servo to move
-                kit.servo[SERVO_CHANNEL].angle = 180  # Move servo back to center
-                sleep(10)  # Wait for servo to move
+                elif state in west_coast:
+                    region = "WEST"
+                    print("Package going to WEST COAST\n")
+                    conveyor.stop()
+                    sleep(SERVO_DELAY)
+                    kit.servo[SERVO_CHANNEL].angle = 55  # Move servo to west position
+                    sleep(1)  # Wait for servo to move
+                    kit.servo[SERVO_CHANNEL].angle = 180  # Move servo back to center
+                    sleep(.5)  # Wait for servo to move
+                    conveyor.start()  # Start conveyor again
 
-            elif state in west_coast:
-                region = "WEST"
-                print("Package going to WEST COAST\n")
-                sleep(SERVO_DELAY)
-                kit.servo[SERVO_CHANNEL].angle = 55  # Move servo to west position
-                sleep(1)  # Wait for servo to move
-                kit.servo[SERVO_CHANNEL].angle = 180  # Move servo back to center
-                sleep(.5)  # Wait for servo to move
+                else:
+                    region = "OTHER"
+                    print("Package going to OTHER REGION\n")
+                    conveyor.stop()
+                    sleep(SERVO_DELAY)
+                    kit.servo[SERVO_CHANNEL].angle = 180  # Move servo to center position
+                    sleep(1)  # Wait for servo to move
+                    conveyor.start()  # Start conveyor again
 
-            else:
-                region = "OTHER"
-                print("Package going to OTHER REGION\n")
-                sleep(SERVO_DELAY)
-                kit.servo[SERVO_CHANNEL].angle = 180  # Move servo to center position
-                sleep(1)  # Wait for servo to move
+                # Send the package data to the API
+                response = requests.post(API_URL, json={
+                    "Package ID": pkg_id,
+                    "name": name,
+                    "street_address": street_address,
+                    "city": city,
+                    "state": state,
+                    "zip_code": zip_code,
+                    "weight": weight,
+                    "region": region
+                })
 
-            # Send the package data to the API
-            requests.post(API_URL, json={
-                "Package ID": pkg_id,
-                "name": name,
-                "street_address": street_address,
-                "city": city,
-                "state": state,
-                "zip_code": zip_code,
-                "weight": weight,
-                "region": region
-            })
-
-        except json.JSONDecodeError:
-            print("Error decoding JSON from QR code data: " + data)
-
-        conveyor.start()
+            except json.JSONDecodeError:
+                print("Error decoding JSON from QR code data: " + data)
 
         # q to quit
         if cv2.waitKey(1) & 0xFF == ord('q'):
