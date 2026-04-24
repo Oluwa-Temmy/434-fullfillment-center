@@ -8,6 +8,7 @@ from time import sleep, time
 from arduino_interface import ArduinoInterface
 from adafruit_servokit import ServoKit
 import busio
+from threading import Timer
 
 
 class ConveyorController:
@@ -54,6 +55,7 @@ east_coast = ("ME", "NH", "MA", "RI", "CT", "NY",
               "NJ", "DE", "MD", "VA", "NC", "SC", "GA", "FL")
 west_coast = ("CA", "OR", "WA")
 
+
 def main():
     camera = cv2.VideoCapture(0)
 
@@ -66,11 +68,19 @@ def main():
     kit = ServoKit(channels=16, i2c=i2c)
     kit.servo[SERVO_CHANNEL].set_pulse_width_range(500, 2500)
 
-    SERVO_DELAY = 1.0  # Seconds to wait after starting conveyor before moving servo
     
-    processing_package = False
     processed_qr_data = set()  # To track processed QR codes and avoid duplicates
 
+    def move_west(kit, ch):
+        kit.servo[ch].angle = 40
+
+    def move_east(kit, ch):
+        kit.servo[ch].angle = 125
+
+    def reset(conveyor, kit, ch):
+        kit.servo[ch].angle = 0
+        conveyor.start()
+   
   
     while True:
         success, frame = camera.read()
@@ -81,15 +91,11 @@ def main():
         qr_codes = decode(frame)
     
         for qr in qr_codes:
-            if processing_package:
-                continue
-
             data = qr.data.decode('utf-8')
 
             if data in processed_qr_data:
                 continue
             
-            processing_package = True
             processed_qr_data.add(data)
 
             print("Package data: " + data)
@@ -104,43 +110,35 @@ def main():
                 state = package.get("state", "")
                 zip_code = package.get("zip_code", "")
                 weight = package.get("weight", "")
-                
+
                 print("State: " + state)
 
                 # region logic
                 if state in east_coast:
                     region = "EAST"
                     print("Package going to EAST COAST\n")
+
                     conveyor.stop()
-                    sleep(SERVO_DELAY)
-                    kit.servo[SERVO_CHANNEL].angle = 125  # Move servo to east position
-                    sleep(5)  # Wait for servo to move
-                    kit.servo[SERVO_CHANNEL].angle = 0  # Move servo back to center
-                    sleep(1)  # Wait for servo to move
-                    conveyor.start()  # Start conveyor again
-                    processing_package = False
+
+                    Timer(1.0, move_east, args=(kit, SERVO_CHANNEL)).start()
+                    Timer(5.0, reset, args=(conveyor, kit, SERVO_CHANNEL)).start()
 
                 elif state in west_coast:
                     region = "WEST"
                     print("Package going to WEST COAST\n")
+
                     conveyor.stop()
-                    sleep(SERVO_DELAY)
-                    kit.servo[SERVO_CHANNEL].angle = 40  # Move servo to west position
-                    sleep(5)  # Wait for servo to move
-                    kit.servo[SERVO_CHANNEL].angle = 0  # Move servo back to center
-                    sleep(.5)  # Wait for servo to move
-                    conveyor.start()  # Start conveyor again
-                    processing_package = False
+
+                    Timer(1.0, move_west, args=(kit, SERVO_CHANNEL)).start()
+                    Timer(5.0, reset, args=(conveyor, kit, SERVO_CHANNEL)).start()
 
                 else:
                     region = "OTHER"
                     print("Package going to OTHER REGION\n")
                     conveyor.stop()
-                    sleep(SERVO_DELAY)
-                    kit.servo[SERVO_CHANNEL].angle = 0  # Move servo to center position
-                    sleep(1)  # Wait for servo to move
-                    conveyor.start()  # Start conveyor again
-                    processing_package = False
+
+                    Timer(1.0, reset, args=(conveyor, kit, SERVO_CHANNEL)).start()
+                    
 
                 # Send the package data to the API
                 response = requests.post(API_URL, json={
@@ -156,9 +154,6 @@ def main():
 
             except json.JSONDecodeError:
                 print("Error decoding JSON from QR code data: " + data)
-            
-            finally:
-                processing_package = False
 
         # q to quit
         if cv2.waitKey(1) & 0xFF == ord('q'):
