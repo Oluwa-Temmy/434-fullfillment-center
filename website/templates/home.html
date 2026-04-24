@@ -283,7 +283,7 @@
         <tr>
           <th onclick="sortBy('id')">Shipping ID</th>
           <th onclick="sortBy('name')">Name</th>
-          <th onclick="sortBy('address')">Address</th>
+          <th onclick="sortBy('street_address')">Address</th>
           <th onclick="sortBy('state')">State</th>
           <th onclick="sortBy('coast')">Coast</th>
           <th onclick="sortBy('delivery_date')">Expected Delivery Date</th>
@@ -403,7 +403,7 @@
       <tr>
         <td><span class="id-badge">${p.package_id ?? `#${String(p.id).padStart(3, "0")}`}</span></td>
         <td style="font-weight:500;">${p.name}</td>
-        <td class="text-muted">${p.address}</td>
+        <td class="text-muted">${p.street_address}</td>
         <td>${p.state}</td>
         <td><span class="coast-badge coast-${p.region.toLowerCase()}">${p.region}</span></td>
         <td class="text-muted text-mono">${fmtDate(p.delivery_date)}</td>

@@ -23,7 +23,7 @@ db = SQLAlchemy(app)
 class Package(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
-    address = db.Column(db.String(200))
+    street_address = db.Column(db.String(200))
     state = db.Column(db.String(10))
     region = db.Column(db.String(20))  # EAST / WEST / OTHER
     ship_date = db.Column(db.DateTime, default=datetime.datetime.now)
@@ -40,7 +40,7 @@ def get_packages():
     return jsonify([{
         "id": p.id,
         "name": p.name,
-        "address": p.address,
+        "street_address": p.street_address,
         "state": p.state,
         "region": p.region,
         "ship_date": p.ship_date.isoformat(),
@@ -61,7 +61,7 @@ def add_package():
     #Create a new Package instance with the provided data
     new_package = Package(
         name=data.get("name", ""),
-        address=data.get("address", ""),
+        street_address=data.get("street_address", ""),
         state=data.get("state", ""),
         region=data.get("region", ""),
         ship_date=ship_date,
