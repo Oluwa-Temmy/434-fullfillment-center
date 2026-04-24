@@ -9,7 +9,7 @@ pinMode(motorDirectionPin2, OUTPUT);
 }
 
 void loop() {
-analogWrite(motorSpeedPin, 90);
+analogWrite(motorSpeedPin, 100);
 digitalWrite(motorDirectionPin1, HIGH);
 digitalWrite(motorDirectionPin2, LOW);
 }
