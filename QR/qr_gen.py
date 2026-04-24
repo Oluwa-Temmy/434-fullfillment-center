@@ -57,14 +57,12 @@ def generate_package():
     pkg_id = f"PKG-{uuid.uuid4()}"
     name = f"{random.choice(first_names)} {random.choice(last_names)}"
 
-    location_type = random.choice(["east", "west", "other"])
+    location_type = random.choice(["east", "west"])
 
     if location_type == "east":
         city, state = random.choice(east_coast_locations)
-    elif location_type == "west":
-        city, state = random.choice(west_coast_locations)
     else:
-        city, state = random.choice(other_locations)
+        city, state = random.choice(west_coast_locations)
 
     zip_code = f"{random.randint(10000, 99999)}"
 
