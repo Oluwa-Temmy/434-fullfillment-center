@@ -103,9 +103,9 @@ def main():
                     conveyor.stop()
                     sleep(SERVO_DELAY)
                     kit.servo[SERVO_CHANNEL].angle = 140  # Move servo to east position
-                    sleep(1)  # Wait for servo to move
+                    sleep(10)  # Wait for servo to move
                     kit.servo[SERVO_CHANNEL].angle = 180  # Move servo back to center
-                    sleep(1)  # Wait for servo to move
+                    sleep(10)  # Wait for servo to move
                     conveyor.start()  # Start conveyor again
 
                 elif state in west_coast:
