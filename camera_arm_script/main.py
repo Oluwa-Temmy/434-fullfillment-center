@@ -106,12 +106,14 @@ def main():
 
     
     QR_READ_TIMEOUT = 2.0  # Max seconds to try reading QR once stopped
+    PRE_SCAN_RUN_SECONDS = 2.5  # Conveyor must run this long before scanning starts
     SERVO_DELAY = 1.0  # Seconds to wait after starting conveyor before moving servo
     bg_subtractor = cv2.createBackgroundSubtractorMOG2(history=200, varThreshold=50, detectShadows=False)
     
     package_detected = False
     detection_start_time = None
     last_qr_data = None
+    last_conveyor_start_time = time()
 
     conveyor.start()
 
@@ -121,10 +123,10 @@ def main():
         if not success:
             break
 
-        # decode QR codes in the frame
-        qr_codes = decode(frame)
+        ready_to_scan = (time() - last_conveyor_start_time) >= PRE_SCAN_RUN_SECONDS
+        qr_codes = decode(frame) if ready_to_scan else []
 
-        if not package_detected and detect_object(frame, bg_subtractor):
+        if not package_detected and ready_to_scan and detect_object(frame, bg_subtractor):
             package_detected = True
             detection_start_time = time()
             last_qr_data = None
@@ -141,6 +143,7 @@ def main():
                 if not last_qr_data:
                     print("No QR code detected in 2 seconds. Resuming conveyor.\n")
                     conveyor.start()
+                    last_conveyor_start_time = time()
                     package_detected = False
                     detection_start_time = None
                     continue
@@ -201,6 +204,7 @@ def main():
                     print("Error decoding JSON from QR code data: " + data)
 
                 conveyor.start()
+                last_conveyor_start_time = time()
                 package_detected = False
                 detection_start_time = None
                 last_qr_data = None
