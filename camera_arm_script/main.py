@@ -117,16 +117,18 @@ def main():
                 if state in east_coast:
                     region = "EAST"
                     print("Package going to EAST COAST\n")
-
-                    Timer(1.0, move_east, args=(kit, SERVO_CHANNEL)).start()
-                    Timer(5.0, reset, args=(conveyor, kit, SERVO_CHANNEL)).start()
+                    conveyor.stop()  # Stop the conveyor to allow time for sorting
+                    Timer(.3, move_east, args=(kit, SERVO_CHANNEL)).start()
+                    Timer(0.6, conveyor.start).start()   
+                    Timer(10.0, reset, args=(conveyor, kit, SERVO_CHANNEL)).start()
 
                 elif state in west_coast:
                     region = "WEST"
                     print("Package going to WEST COAST\n")
-
-                    Timer(1.0, move_west, args=(kit, SERVO_CHANNEL)).start()
-                    Timer(5.0, reset, args=(conveyor, kit, SERVO_CHANNEL)).start()
+                    conveyor.stop()  # Stop the conveyor to allow time for sorting
+                    Timer(0.3, move_west, args=(kit, SERVO_CHANNEL)).start()
+                    Timer(0.6, conveyor.start).start()
+                    Timer(10.0, reset, args=(conveyor, kit, SERVO_CHANNEL)).start()
 
                 else:
                     region = "OTHER"
