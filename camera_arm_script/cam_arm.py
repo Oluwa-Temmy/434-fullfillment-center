@@ -1,6 +1,7 @@
 import cv2
 import json
 from pyzbar.pyzbar import decode
+import requests
 import serial
 import serial.tools.list_ports
 from time import sleep, time
@@ -87,52 +88,90 @@ EAST_COAST = ("ME", "NH", "MA", "RI", "CT", "NY",
 WEST_COAST = ("CA", "OR", "WA")
 
 
+def detect_object(frame, bg_subtractor, min_area=5000):
+    """Detect if a box-like package is present in the conveyor area."""
+    h, w = frame.shape[:2]
+
+    y1 = int(h * 0.45)
+    y2 = int(h * 0.95)
+    x1 = int(w * 0.15)
+    x2 = int(w * 0.85)
+    roi = frame[y1:y2, x1:x2]
+
+    fg_mask = bg_subtractor.apply(roi)
+    _, thresh = cv2.threshold(fg_mask, 200, 255, cv2.THRESH_BINARY)
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+    thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
+    thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+        if area < min_area:
+            continue
+
+        x, y, bw, bh = cv2.boundingRect(cnt)
+        if bh == 0:
+            continue
+
+        aspect_ratio = bw / float(bh)
+        rect_area = bw * bh
+        fill_ratio = area / float(rect_area) if rect_area else 0.0
+
+        if 0.5 <= aspect_ratio <= 2.5 and fill_ratio >= 0.45:
+            return True
+
+    return False
+
+
 def main():
     camera = cv2.VideoCapture(0)
     arduino = ArduinoInterface()
     servo = ServoController(arduino)
     conveyor = ConveyorController(arduino)
     
-    QR_READ_TIMEOUT = 2.0  # Max seconds to try reading QR
+    QR_READ_TIMEOUT = 2.0  # Max seconds to try reading QR once stopped
+    PRE_SCAN_RUN_SECONDS = 2.5  # Conveyor must run this long before scanning starts
     SERVO_DELAY = 0.25     # Seconds to wait after starting conveyor before moving servo
-    API_URL = "http://10.0.192.208:5000/api/packages"
+    API_URL = "http://10.0.192.208:5000/api/add-package"
+    bg_subtractor = cv2.createBackgroundSubtractorMOG2(history=200, varThreshold=50, detectShadows=False)
     package_detected = False
     detection_start_time = None
     last_qr_data = None
+    last_conveyor_start_time = time()
+
+    conveyor.start()
     
     while True:
         success, frame = camera.read()
         if not success:
             break
 
-        # decode QR codes in the frame
-        qr_codes = decode(frame)
+        ready_to_scan = (time() - last_conveyor_start_time) >= PRE_SCAN_RUN_SECONDS
+        qr_codes = decode(frame) if ready_to_scan else []
 
-        if qr_codes and not package_detected:
-            # First detection - stop conveyor and start timer
+        if not package_detected and ready_to_scan and detect_object(frame, bg_subtractor):
             package_detected = True
             detection_start_time = time()
+            last_qr_data = None
             conveyor.stop()
-            print("Package detected, reading QR code...")
+            print("Object detected, conveyor stopped. Waiting for QR code...")
         
         if package_detected:
             elapsed = time() - detection_start_time
             
-            # Try to read QR data
             if qr_codes:
-                qr = qr_codes[0]
-                last_qr_data = qr.data.decode('utf-8')
-                
-                # Draw rectangle around QR code
-                points = qr.polygon
-                if points:
-                    pts = [(p.x, p.y) for p in points]
-                    for i in range(len(pts)):
-                        cv2.line(frame, pts[i], pts[(i+1) % len(pts)], (0, 255, 0), 3)
-            
-            # Process after timeout OR if we have valid data
-            if elapsed >= QR_READ_TIMEOUT or (last_qr_data and elapsed >= 0.5):
-                print(f"Processing after {elapsed:.1f}s")
+                last_qr_data = qr_codes[0].data.decode('utf-8')
+
+            if last_qr_data or elapsed >= QR_READ_TIMEOUT:
+                if not last_qr_data:
+                    print("No QR code detected in 2 seconds. Resuming conveyor.\n")
+                    conveyor.start()
+                    last_conveyor_start_time = time()
+                    package_detected = False
+                    detection_start_time = None
+                    continue
                 
                 direction = 'center'  # Default
                 
@@ -141,27 +180,51 @@ def main():
                     
                     try:
                         package = json.loads(last_qr_data)
-                        address = package.get("address", "")
-                        state = address.split(",")[-1].strip()
+                        pkg_id = package.get("pkg_id", "")
+                        name = package.get("name", "")
+                        street_address = package.get("street_address", "")
+                        city = package.get("city", "")
+                        state = package.get("state", "")
+                        zip_code = package.get("zip_code", "")
+                        weight = package.get("weight", "")
                         print("State: " + state)
 
                         if state in EAST_COAST:
                             print("Package going to EAST COAST\n")
                             direction = 'east'
+                            region = "EAST"
                         elif state in WEST_COAST:
                             print("Package going to WEST COAST\n")
                             direction = 'west'
+                            region = "WEST"
                         else:
                             print("Package going to OTHER REGION\n")
                             direction = 'center'
+                            region = "OTHER"
+
+                        address = ", ".join(
+                            part for part in [street_address, city, f"{state} {zip_code}".strip()]
+                            if part.strip()
+                        )
+
+                        requests.post(API_URL, json={
+                            "Package ID": pkg_id,
+                            "name": name,
+                            "address": address,
+                            "street_address": street_address,
+                            "city": city,
+                            "state": state,
+                            "zip_code": zip_code,
+                            "weight": weight,
+                            "region": region
+                        })
 
                     except json.JSONDecodeError:
                         print("Error: QR code data is not valid JSON\n")
-                else:
-                    print("Could not read QR code, moving to center\n")
                 
                 # Start conveyor first, then move servo after delay
                 conveyor.start()
+                last_conveyor_start_time = time()
                 sleep(SERVO_DELAY)
                 servo.sort_package(direction)
                 
