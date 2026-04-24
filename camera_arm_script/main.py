@@ -103,8 +103,8 @@ def main():
                     conveyor.stop()
                     sleep(SERVO_DELAY)
                     kit.servo[SERVO_CHANNEL].angle = 125  # Move servo to east position
-                    sleep(1)  # Wait for servo to move
-                    kit.servo[SERVO_CHANNEL].angle = 180  # Move servo back to center
+                    sleep(5)  # Wait for servo to move
+                    kit.servo[SERVO_CHANNEL].angle = 0  # Move servo back to center
                     sleep(1)  # Wait for servo to move
                     conveyor.start()  # Start conveyor again
 
@@ -114,8 +114,8 @@ def main():
                     conveyor.stop()
                     sleep(SERVO_DELAY)
                     kit.servo[SERVO_CHANNEL].angle = 40  # Move servo to west position
-                    sleep(1)  # Wait for servo to move
-                    kit.servo[SERVO_CHANNEL].angle = 180  # Move servo back to center
+                    sleep(5)  # Wait for servo to move
+                    kit.servo[SERVO_CHANNEL].angle = 0  # Move servo back to center
                     sleep(.5)  # Wait for servo to move
                     conveyor.start()  # Start conveyor again
 
@@ -124,7 +124,7 @@ def main():
                     print("Package going to OTHER REGION\n")
                     conveyor.stop()
                     sleep(SERVO_DELAY)
-                    kit.servo[SERVO_CHANNEL].angle = 180  # Move servo to center position
+                    kit.servo[SERVO_CHANNEL].angle = 0  # Move servo to center position
                     sleep(1)  # Wait for servo to move
                     conveyor.start()  # Start conveyor again
 
