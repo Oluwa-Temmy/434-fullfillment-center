@@ -56,21 +56,20 @@ west_coast = ("CA", "OR", "WA")
 
 def main():
     camera = cv2.VideoCapture(0)
+
     arduino = ArduinoInterface(port='/dev/ttyACM0') 
     conveyor = ConveyorController(arduino)
+
     SERVO_CHANNEL = 0
 
     i2c = busio.I2C(3, 2)
     kit = ServoKit(channels=16, i2c=i2c)
     kit.servo[SERVO_CHANNEL].set_pulse_width_range(500, 2500)
 
-    
-    QR_READ_TIMEOUT = 2.0  # Max seconds to try reading QR
     SERVO_DELAY = 1.0  # Seconds to wait after starting conveyor before moving servo
     
-    package_detected = False
-    detection_start_time = None
-    last_qr_data = None
+    processing_package = False
+    processed_qr_data = set()  # To track processed QR codes and avoid duplicates
 
   
     while True:
@@ -80,13 +79,24 @@ def main():
 
         # decode QR codes in the frame
         qr_codes = decode(frame)
-
+    
         for qr in qr_codes:
+            if processing_package:
+                continue
+
             data = qr.data.decode('utf-8')
+
+            if data in processed_qr_data:
+                continue
+            
+            processing_package = True
+            processed_qr_data.add(data)
+
             print("Package data: " + data)
 
             try:
                 package = json.loads(data)
+
                 pkg_id = package.get("pkg_id", "")
                 name = package.get("name", "")
                 street_address = package.get("street_address", "")
@@ -94,6 +104,7 @@ def main():
                 state = package.get("state", "")
                 zip_code = package.get("zip_code", "")
                 weight = package.get("weight", "")
+                
                 print("State: " + state)
 
                 # region logic
@@ -107,6 +118,7 @@ def main():
                     kit.servo[SERVO_CHANNEL].angle = 0  # Move servo back to center
                     sleep(1)  # Wait for servo to move
                     conveyor.start()  # Start conveyor again
+                    processing_package = False
 
                 elif state in west_coast:
                     region = "WEST"
@@ -118,6 +130,7 @@ def main():
                     kit.servo[SERVO_CHANNEL].angle = 0  # Move servo back to center
                     sleep(.5)  # Wait for servo to move
                     conveyor.start()  # Start conveyor again
+                    processing_package = False
 
                 else:
                     region = "OTHER"
@@ -127,6 +140,7 @@ def main():
                     kit.servo[SERVO_CHANNEL].angle = 0  # Move servo to center position
                     sleep(1)  # Wait for servo to move
                     conveyor.start()  # Start conveyor again
+                    processing_package = False
 
                 # Send the package data to the API
                 response = requests.post(API_URL, json={
@@ -142,6 +156,9 @@ def main():
 
             except json.JSONDecodeError:
                 print("Error decoding JSON from QR code data: " + data)
+            
+            finally:
+                processing_package = False
 
         # q to quit
         if cv2.waitKey(1) & 0xFF == ord('q'):
