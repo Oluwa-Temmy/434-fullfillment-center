@@ -44,7 +44,7 @@ def get_packages():
         "state": p.state,
         "region": p.region,
         "ship_date": p.ship_date.isoformat(),
-        "delivery_date": p.delivery_date.isoformat()
+        "delivery_date": (p.ship_date + datetime.timedelta(days=14)).isoformat()
     } 
     for p in packages
     ])
