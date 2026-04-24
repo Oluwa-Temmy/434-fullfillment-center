@@ -75,11 +75,11 @@ def main():
         kit.servo[ch].angle = 40
 
     def move_east(kit, ch):
-        kit.servo[ch].angle = 125
+        kit.servo[ch].angle = 130
 
     def reset(conveyor, kit, ch):
         kit.servo[ch].angle = 0
-        conveyor.start()
+        
    
   
     while True:
