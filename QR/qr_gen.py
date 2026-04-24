@@ -1,6 +1,7 @@
 import random
 import qrcode
 import json
+import uuid
 
 first_names = ["James", "Sarah", "Mike", "Emily", "John", "Ashley", "David", "Jessica", 
                "Robert", "Linda", "Michael", "Barbara", "William", "Elizabeth", "Richard", "Jennifer"]
@@ -53,7 +54,7 @@ streets = ["Main St", "Oak Ave", "Maple Dr", "Cedar Ln", "Elm St", "Park Blvd",
            "Dogwood Ln", "Cypress St", "Redwood Ave"]
 
 def generate_package():
-    pkg_id = f"PKG-{random.randint(10000, 99999)}"
+    pkg_id = f"PKG-{uuid.uuid4()}"
     name = f"{random.choice(first_names)} {random.choice(last_names)}"
 
     location_type = random.choice(["east", "west", "other"])
