@@ -118,8 +118,6 @@ def main():
                     region = "EAST"
                     print("Package going to EAST COAST\n")
 
-                    conveyor.stop()
-
                     Timer(1.0, move_east, args=(kit, SERVO_CHANNEL)).start()
                     Timer(5.0, reset, args=(conveyor, kit, SERVO_CHANNEL)).start()
 
@@ -127,15 +125,12 @@ def main():
                     region = "WEST"
                     print("Package going to WEST COAST\n")
 
-                    conveyor.stop()
-
                     Timer(1.0, move_west, args=(kit, SERVO_CHANNEL)).start()
                     Timer(5.0, reset, args=(conveyor, kit, SERVO_CHANNEL)).start()
 
                 else:
                     region = "OTHER"
                     print("Package going to OTHER REGION\n")
-                    conveyor.stop()
 
                     Timer(1.0, reset, args=(conveyor, kit, SERVO_CHANNEL)).start()
                     
