@@ -120,7 +120,7 @@ def main():
                     conveyor.stop()  # Stop the conveyor to allow time for sorting
                     Timer(.3, move_east, args=(kit, SERVO_CHANNEL)).start()
                     Timer(0.6, conveyor.start).start()   
-                    Timer(10.0, reset, args=(conveyor, kit, SERVO_CHANNEL)).start()
+                    Timer(15.0, reset, args=(conveyor, kit, SERVO_CHANNEL)).start()
 
                 elif state in west_coast:
                     region = "WEST"
