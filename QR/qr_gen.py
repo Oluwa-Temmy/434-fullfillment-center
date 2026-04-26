@@ -69,18 +69,27 @@ def generate_package():
     # Randomly generate a name by combining a random first name and a random last name
     name = f"{random.choice(first_names)} {random.choice(last_names)}" 
 
-    location_type = random.choice(["east", "west"])
+    # Randomly select a location type: east, west, or other
+    location_type = random.choice(["east", "west", "other"])
 
+    # Based on the selected location type, 
+    # randomly select a city and state from the corresponding list
     if location_type == "east":
         city, state = random.choice(east_coast_locations)
-    else:
+    elif location_type == "west":
         city, state = random.choice(west_coast_locations)
+    else:
+        city, state = random.choice(other_locations)
 
+    """Randomly generate a 5-digit zip code, randomly generate a street address 
+    by combining a random number and a random street name, and randomly generate 
+    a weight between 0.5 and 50.0 pounds"""
     zip_code = f"{random.randint(10000, 99999)}"
 
     street = f"{random.randint(100, 9999)} {random.choice(streets)}"
     weight = round(random.uniform(0.5, 50.0), 2)
 
+    # Create a dictionary with the package data to be encoded in the QR code
     package_data = {
         "pkg_id": pkg_id,
         "name": name,
@@ -91,12 +100,14 @@ def generate_package():
         "weight": f"{weight}lbs"
     }
 
+    # Generate a QR code from the package data 
     img = qrcode.make(json.dumps(package_data))
-    img.save(f"{pkg_id}.png")
+    # Save the QR code image to the "images" directory, organized by location type (east, west, other)
+    img.save(f"QR/images/{location_type}/{pkg_id}.png")
 
     print(f"QR code generated: {pkg_id}.png")
 
 
-# Generate 8 test QR codes
+# Generate 8 QR codes
 for _ in range(8):
     generate_package()
