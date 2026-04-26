@@ -3,13 +3,21 @@ import qrcode
 import json
 import uuid
 
+""" 
+This script generates QR codes for packages with random data. Each package has a unique ID,
+a random name, a random address (street, city, state, zip code), and a random weight. 
+
+The QR code is saved as a PNG file with the package ID as the filename.
+"""
+
+# first and last names for random generation
 first_names = ["James", "Sarah", "Mike", "Emily", "John", "Ashley", "David", "Jessica", 
                "Robert", "Linda", "Michael", "Barbara", "William", "Elizabeth", "Richard", "Jennifer"]
 
 last_names = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", 
               "Wilson", "Moore", "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris"]
 
-
+# east, west, and other locations for random generation
 east_coast_locations = [
     ("Portland", "ME"),
     ("Manchester", "NH"),
@@ -48,14 +56,18 @@ other_locations = [
     ("Cheyenne", "WY")
 ]
 
+# common street names for random generation
 streets = ["Main St", "Oak Ave", "Maple Dr", "Cedar Ln", "Elm St", "Park Blvd", 
            "Pine St", "Spruce Ave", "Birch Dr", "Willow Ln", "Ash St", "Cherry Ave", 
            "Walnut Dr", "Poplar Ln", "Hickory St", "Sycamore Ave", "Magnolia Dr", 
            "Dogwood Ln", "Cypress St", "Redwood Ave"]
 
+# Function to generate a random package and create a QR code for it
 def generate_package():
-    pkg_id = f"PKG-{uuid.uuid4()}"
-    name = f"{random.choice(first_names)} {random.choice(last_names)}"
+    pkg_id = f"PKG-{uuid.uuid4()}" # UUID used to ensure unique package IDs
+
+    # Randomly generate a name by combining a random first name and a random last name
+    name = f"{random.choice(first_names)} {random.choice(last_names)}" 
 
     location_type = random.choice(["east", "west"])
 
