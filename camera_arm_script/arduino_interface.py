@@ -10,7 +10,7 @@ from time import sleep
     Arduino, send and receive data, and manage the serial connection. """
 
 class ArduinoInterface:
-    """ this class ahngles the communication with the arduino. 
+    """ this class allows for communication with the arduino. 
     It detects the port, sends commands to arduino and establishes and closes serial connection.
    """
     
