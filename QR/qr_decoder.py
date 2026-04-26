@@ -2,24 +2,42 @@ import cv2
 import json
 from pyzbar.pyzbar import decode
 
+""" Our INITIAL decoding script for QR codes, which was implemented in the main camera arm script
+
+This is a SEPERATE file we used to first test the QR code decoding logic to ensure it worked as expected 
+BEFORE integrating it into the main script. """
+
+# Uses pyzbar library to decode QR codes from camera feed.
+
+# List of states for east and west coast regions
 east_coast = ("ME", "NH", "MA", "RI", "CT", "NY", 
               "NJ", "DE", "MD", "VA", "NC", "SC", "GA", "FL", "IL", "PA", "WV")
 west_coast = ("CA", "OR", "WA", "AK", "HI")
 
+# defining what camera is capturing footage (on the RPi, 0 is the webcam connected to the USB port)
 camera = cv2.VideoCapture(0)
 
+
+# loop that holds camera processing and QR code decoding logic 
+# runs until we break out of it 
+
 while True:
+    # read a frame from the camera
     success, frame = camera.read()
+    # if no frame, stop loop
     if not success:
         break
 
     # decode QR codes in the frame
     qr_codes = decode(frame)
 
+    # if QR codes are found, print the data and determine the region based on the state
     for qr in qr_codes:
         data = qr.data.decode('utf-8')
         print("Package data: " + data)
 
+        # data expected to be in JSON format
+        # try to parse it and extract the address information
         try:
             package = json.loads(data)
             street = package.get("street_address", "")
@@ -28,6 +46,7 @@ while True:
             address = f"{street}, {city}, {state}"
             print("State: " + state)
 
+            # determine region based on state and print 
             if state in east_coast:
                 print("Package going to EAST COAST\n")
             elif state in west_coast:
@@ -35,66 +54,13 @@ while True:
             else:
                 print("Package going to OTHER REGION\n")
 
+
         except json.JSONDecodeError:
             print("Error: QR code data is not valid JSON\n")
 
-    # q to quit
-    cv2.imshow("QR Scanner", frame) # to view camera feed 
+    # q to quit the program
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
 camera.release()
 cv2.destroyAllWindows()
-
-
-"""# program to detect and decode qr codes 
-
-# importing OpenCV package
-import cv2
-import json
-
-east_coast = ("ME", "NH", "MA", "RI", "CT", "NY", 
-              "NJ", "DE", "MD", "VA", "NC", "SC", "GA", "FL")
-
-west_coast = ("CA", "OR", "WA")
-
-# defining what camera is capturing footage
-camera = cv2.VideoCapture(0)
-
-# creating a QR code detector object
-detector = cv2.QRCodeDetector()
-
-# loop runs forever until we break out of it (with esc key)
-while True:
-    # read a frame from the camera
-    # success = True if frame was grabbed, frame = the actual image
-    success, frame = camera.read()
-    
-    # if no frame, stop loop
-    if not success:
-        break
-
-    # try to find and decode a QR code in the frame
-    # data = decoded text, other two values we don't need
-    data, _, _ = detector.detectAndDecode(frame)
-
-    # if a QR code was found and decoded, print the data
-    if data:
-        print("package data: " + data + "\n")
-
-        package = json.loads(data)
-        address = package["address"]
-
-        state = address.split(",")[-1].strip()
-        print("State: " + state + "\n")
-  
-        if state in east_coast:
-            print("Package going to EAST COAST\n")
-
-        elif state in west_coast:
-            print("Package going to WEST COAST\n")
-
-        else:
-            print("Package going to OTHER REGION")
-
-camera.release() """
