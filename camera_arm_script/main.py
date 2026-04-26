@@ -98,16 +98,12 @@ def main():
 
     """
     Functions to move the servo arm to sort packages to the east or west coast bins.
-    This is impleted because the servo needs to be moved back to the center position after sorting 
+
+    Implemented as the servo needs to be moved back to the center position after sorting 
     each package. 
 
-    Using sleep() did not work because it stopped the entire program. This messed with the 
-    DC motor control and the camera feed, causing the system to become unresponsive during the sleep period.
-
-    In our 
-
-
-    Instead, we used Timer from the threading package to schedule the servo movements and conveyor control without    
+    Using sleep() did not work because it stopped the entire program. 
+    Instead, Timer was used from the threading package.
     """
     def move_west(kit, ch):
         kit.servo[ch].angle = 40
@@ -167,13 +163,7 @@ def main():
                     so the servo has time to sort the package before the next one comes in."""
                     conveyor.stop()  
 
-                    """Timer is used to help schedule the servo movement and conveyor control without 
-                    sleeping the entire program for that period of time. 
-
-                    We found that using sleep() caused the entire program to become unresponsive 
-                    during the sleep period, which messed with the camera feed and DC motor control.
-
-                    0.3 seconds after the conveyor is stopped, the move_east function is called 
+                    """0.3 seconds after the conveyor is stopped, the move_east function is called 
                     to move the servo arm to the position for sorting packages to the east coast bin.
                     """
                     Timer(.3, move_east, args=(kit, SERVO_CHANNEL)).start()
@@ -183,12 +173,11 @@ def main():
                     Timer(0.6, conveyor.start).start()   
 
                     """After 15 seconds, the reset function is called to move the servo back 
-                    to the center position and get ready for the next package.
-
-                    We found that 15 seconds was a good amount of time to allow the package 
-                    to be sorted completely."""
+                    to the center position and get ready for the next package."""
 
                     Timer(15.0, reset, args=(conveyor, kit, SERVO_CHANNEL)).start()
+
+
 
                     """ West coast logic is the same as east coast, but with different servo angle 
                     for sorting to the west coast bin.
@@ -203,6 +192,8 @@ def main():
                     Timer(0.3, move_west, args=(kit, SERVO_CHANNEL)).start()
                     Timer(0.6, conveyor.start).start()
                     Timer(10.0, reset, args=(conveyor, kit, SERVO_CHANNEL)).start()
+                
+
                 
                     """ If the state is not in either the east or 
                         west coast tuples, it is categorized as "OTHER.

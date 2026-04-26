@@ -2,9 +2,14 @@ import serial
 import serial.tools.list_ports
 from time import sleep
 
+""" Script to handle communication with the Arduino controlling the DC motor for the belt """
+
+""" Using the pyserial library to handle serial communication with the Arduino. 
+
+    ArduinoInterface class (from the pyserial library) provides the methods to connect to the 
+    Arduino, send and receive data, and manage the serial connection. """
 
 class ArduinoInterface:
-    """Handles serial communication with an Arduino."""
     
     def __init__(self, port=None, baudrate=9600, timeout=1):
         """Initialize the Arduino serial connection.
